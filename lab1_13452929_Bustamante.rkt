@@ -1,4 +1,7 @@
 #lang racket
+;(require "TDAoption.rkt")
+
+
 
 ;===============================================================================================
 ;TDA Option - costructor. RF2
@@ -89,35 +92,16 @@
 
 
 ;===============================================================================================
-;Script de pruebas
+;Script de pruebas N°1
 ;===============================================================================================
 ;creando opciones
 ;opción 1 vinculada al chatbot 2 con su flujo 4 (asumiendo su existencia) en sistema
-(define op1 (option 1 "Viajar" 2 4 "viajar" "turistear" "conocer"))
+(define op1 (option 1 "1) Viajar" 2 1 "viajar" "turistear" "conocer"))
 op1
 ;opción 2 vinculada al chatbot 4 con su flujo 3 (asumiendo su existencia) en sistema
-(define op2 (option 2 "Estudiar" 4 3 "aprender" "perfeccionarme"))
+(define op2 (option 2 "2) Estudiar" 3 1 "estudiar" "aprender" "perfeccionarme"))
 op2
 
 ;creando un nuevo flow
-(define f10 (flow 1 "Flujo1: mensaje de prueba"))
+(define f10 (flow 1 "Flujo1" op1 op2 op2));solo añade una incidencia de op2
 f10
-;alternativamente podría usarse:
-(define f12 (flow 1 "Flujo1: mensaje de prueba" op1 op2))
-f12
-
-;añadiendo opciones 1 y 2 al flujo f10
-(define f11 (flow-add-option f10 op1))
-
-
-;creando un nuevo chatbot
-(define cb10 (chatbot 0 "Asistente" "Bienvenido, ¿Qué te gustaría hacer?" 1))
-cb10
-;alternativamente podría usarse:
-(define cb11 (chatbot 0 "Asistente" "Bienvenido, ¿Qué te gustaría hacer?" 1 f12))
-cb11
-
-;añadiendo flujo a un chatbot
-;el resultado alcanzado en cb11 es equivalente al ilustrado en cb11 de la función 5.
-(define cb12 (chatbot-add-flow cb10 f12))
-cb12
