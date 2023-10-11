@@ -1,7 +1,13 @@
 #lang racket
-;(require "TDAoption.rkt")
 
-
+(provide flow)
+(provide option)
+(provide flow-add-option)
+(provide chatbot)
+(provide chatbot-add-flow)
+(provide system)
+;(provide )
+;(provide )
 
 ;===============================================================================================
 ;TDA Option - costructor. RF2
@@ -91,17 +97,3 @@
 
 
 
-;===============================================================================================
-;Script de pruebas N°1
-;===============================================================================================
-;creando opciones
-;opción 1 vinculada al chatbot 2 con su flujo 4 (asumiendo su existencia) en sistema
-(define op1 (option 1 "1) Viajar" 2 1 "viajar" "turistear" "conocer"))
-op1
-;opción 2 vinculada al chatbot 4 con su flujo 3 (asumiendo su existencia) en sistema
-(define op2 (option 2 "2) Estudiar" 3 1 "estudiar" "aprender" "perfeccionarme"))
-op2
-
-;creando un nuevo flow
-(define f10 (flow 1 "Flujo1" op1 op2 op2));solo añade una incidencia de op2
-f10
