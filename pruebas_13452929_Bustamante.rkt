@@ -26,8 +26,8 @@ f10
 ;creando un nuevo flow
 (define f12 (flow 2 "Flujo2" op2 op3 op4))
 f12
-(define f11 (flow-add-option f10 op1)) ;se intenta añadir opción duplicada
-(define cb0 (chatbot 0 "Inicial" "Bienvenido\n¿Qué te gustaría hacer?" 1 f10 f10))  ;solo añade una ocurrencia de f10
-(define s0 (system "Chatbots Paradigmas" 0 cb0 cb0))
-s0
+;(define f11 (flow-add-option f10 op1)) ;se intenta añadir opción duplicada
+;(define cb0 (chatbot 0 "Inicial" "Bienvenido\n¿Qué te gustaría hacer?" 1 f10 f10))  ;solo añade una ocurrencia de f10
+;(define s0 (system "Chatbots Paradigmas" 0 cb0 cb0))
+;s0
 ;(define s1 (system-add-chatbot s0 cb0)) ;igual a s0

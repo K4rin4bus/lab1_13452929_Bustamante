@@ -1,11 +1,14 @@
 #lang racket
 
-(provide flow)
+(require "TDAoption.rkt")
+(require "TDAflow.rkt")
+(require "TDAchatbot.rkt")
 (provide option)
+(provide flow)
 (provide flow-add-option)
 (provide chatbot)
-(provide chatbot-add-flow)
-(provide system)
+;(provide chatbot-add-flow)
+;(provide system)
 ;(provide )
 ;(provide )
 
@@ -30,8 +33,6 @@
 (define (flow id name-msg . options)
   (list id name-msg options))
 
-; falta hacer id autoincrementable
-
 
 ;===============================================================================================
 ;TDA Flow - modificador. RF4
@@ -39,10 +40,15 @@
 ;===============================================================================================
 ;Dom: flow X option
 ;Rec: flow
-(define (flow-add-option some-flow option)
-  (cons option some-flow))
-;falta
-;verifica que las opciones añadidas no se repitan en base al id de éstos.
+
+(define (flow-add-option flow option)
+  (if (not (option-exists? flow option))
+      (let* ((flow-id (get-flow-id flow))
+             (flow-name-msg (get-flow-name-msg flow))
+             (existing-options (get-flow-options flow))
+             (new-options (cons option existing-options)))
+        (list flow-id flow-name-msg new-options))
+      flow))
 
 
 ;===============================================================================================
@@ -54,32 +60,31 @@
 (define (chatbot chatbotID name welcomeMessage startFlowId . flows)
   (list chatbotID name welcomeMessage startFlowId flows))
 
-;Falta
-;Chatbots quedan identificados por un ID único.
-;verificar unicidad antes de agregarlo a un sistema.
-;verificar que los flujos añadidos no se repitan, en base al id de éstos.
 
 
 ;===============================================================================================
 ;TDA chatbot - modificador. RF6
 ;Función modificadora para añadir flujos a un chatbot.
+;Recursion de cola
 ;===============================================================================================
 ;Dom: chatbot X flow
 ;Rec: chatbot
 (define (chatbot-add-flow some-chatbot flow)
-  (cons flow some-chatbot))
-;(define (chatbot-add-flow some-chatbot flow)
-;  (if (null? some-chatbot)        ; Si la lista está vacía
- ;     (some-chatbot flow)         ; Entrega la lista con el nuevo elemento
-;      (cons (car some-chatbot)    ; Agrega primer elemento de lista original
- ;           (chatbot-add-flow     ; llamada recursiva a la funcion
-;             (cdr some-chatbot))  ; Toma el resto de la lista
-;            flow)))
+  (define (add-flow-to-list flows new-flow acc)
+    (if (null? flows)
+        (reverse (cons new-flow acc))
+        (add-flow-to-list (cdr flows) new-flow (cons (car flows) acc))))
 
+  (if (not (flow-exists? some-chatbot flow))
+      (let* ((chatbotID (get-chatbot-chatbotID some-chatbot))
+             (name (get-chatbot-name some-chatbot))
+             (welcomeMessage (get-chatbot-welcomeMessage some-chatbot))
+             (startFlowId (get-chatbot-startFlowId some-chatbot))
+             (existing-flows (get-chatbot-flows some-chatbot))
+             (new-flows (add-flow-to-list existing-flows flow '())))
+        (list chatbotID name welcomeMessage startFlowId new-flows))
+      some-chatbot))
 
-;falta
-;verifica que los flujos añadidos no se repitan en base al id de éstos.
-;recursion natural genera conflicto de aridad
 
 
 ;===============================================================================================
@@ -90,10 +95,36 @@
 ;(indicando que pueden recibir 0 o más chatbots)     
 ;Rec: system
 (define (system name initialChatbotCodeLink . chatbots)
-  (list (current-seconds) name initialChatbotCodeLink chatbots))
+  (list name '() initialChatbotCodeLink chatbots "" '() (current-seconds) ))
+
+(define make-system
+  (lambda(name users initialChatbotCodeLink chatbots loggedin history fecha)
+    (list name users initialChatbotCodeLink chatbots loggedin history fecha)))
 
 
 
 
 
 
+;===============================================================================================
+;                            Script de pruebas 
+;===============================================================================================
+;Ejemplo de un sistema de chatbots basado en el esquema del enunciado general
+;Opciones Chabot0
+(define op1 (option  1 "1) Viajar" 1 1 "viajar" "turistear" "conocer"))
+(define op2 (option  2 "2) Estudiar" 2 1 "estudiar" "aprender" "perfeccionarme"))
+
+;Flujo 1 Chatbot 0
+(define f10 (flow 1 "Flujo Principal Chatbot 1\nBienvenido\n¿Qué te gustaría hacer?" op1 op2 )) ;solo añade una ocurrencia de op2 y op1
+(define f11 (flow-add-option f10 op1)) ;se intenta añadir opción duplicada
+
+;Chabot0
+(define cb0 (chatbot 0 "Inicial" "Bienvenido\n¿Qué te gustaría hacer?" 1 f10 ))  ;solo añade una ocurrencia de f10
+;cb0
+
+;Sistema
+(define s0 (system "Chatbots Paradigmas" 0 cb0))
+s0
+(define s1 (system-add-chatbot s0 cb0)) ;igual a s0
+;(define s2 (system-add-user s0 "user1"))
+;(define s3 (system-add-user s2 "user2"))
