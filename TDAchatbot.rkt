@@ -1,53 +1,38 @@
 #lang racket
 (require "TDAflow.rkt")
 ;(provide )
-(provide get-chatbot-chatbotID)
+(provide get-chatbot-id)
 (provide get-chatbot-name)
 (provide get-chatbot-welcomeMessage)
 (provide get-chatbot-startFlowId)
 (provide get-chatbot-flows)
 (provide flow-exists?)
+(provide find-chatbot-by-id)
 
-;;get-chatbot-chatbotID : permite obtener el chatbotID de la funcion chatbot 
-;;Dom: chatbot
-;;Rec: chatbotID (integer)
-
-(define (get-chatbot-chatbotID chatbot)
-  (car chatbot))
-
-;;get-chatbot-name : permite obtener el name de la funcion chatbot 
-;;Dom: chatbot
-;;Rec: name (string)
-
-(define (get-chatbot-name chatbot)
-  (cadr chatbot))
-
-;;get-chatbot-welcomeMessage : permite obtener el chatbotID de la funcion chatbot 
-;;Dom: chatbot
-;;Rec: welcomeMessage (string)
-
-(define (get-chatbot-welcomeMessage chatbot)
-  (caddr chatbot))
-
-;;get-chatbot-startFlowId : permite obtener el startFlowId de la funcion chatbot 
-;;Dom: chatbot
-;;Rec: startFlowId (integer)
-
-(define (get-chatbot-startFlowId chatbot)
-  (cadddr chatbot))
+;===============================================================================================
+;TDA Chatbot - Capa Selectora
+;===============================================================================================
+(define get-chatbot-id car); obtiene el id del chatbot
+(define get-chatbot-name cadr) ;obtiene el name del chatbot
+(define get-chatbot-welcomeMessage caddr) ; obtienen el mensaje del chatbot
+(define get-chatbot-startFlowId cadddr); obtiene el startFlowId del chatbot
+(define get-chatbot-flows (lambda (chatbot) (car (cdr (cdr (cdr (cdr chatbot))))))); obtiene la lista flujos del chatbot
 
 
-;;get-chatbot-flows : permite obtener el flows de la funcion chatbot 
-;;Dom: chatbot
-;;Rec: flows (lista)
-
-(define (get-chatbot-flows chatbot)
-  (cddddr chatbot))
-
-;;flow-exists? : Verifica si flow existe en la lista de chatbot para evitar duplicados 
-;;Dom: chatbot X flow
-;;Rec: bool (#t o #f)
-
+;===============================================================================================
+;TDA Chatbot - Capa Pertenencia
+;Verifica si flow existe en la lista de chatbot para evitar duplicados 
+;===============================================================================================
 (define (flow-exists? chatbot flow)
   (member (get-flow-id flow) (map get-flow-id (get-chatbot-flows chatbot))))
+
+
+;===============================================================================================
+; Funcion que busca un chatbot por su id
+;=============================================================================================== 
+(define (find-chatbot-by-id chatbots chatbot-id)
+    (cond
+      ((null? chatbots) #f)
+      ((= (get-chatbot-id (car chatbots)) chatbot-id) (car chatbots))
+      (else (find-chatbot-by-id (cdr chatbots) chatbot-id))))
 

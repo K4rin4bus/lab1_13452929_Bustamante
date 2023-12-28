@@ -6,7 +6,7 @@
 (provide get-option-initialFlowCodeLink)
 (provide get-option-keyword)
 (provide option-exists?)
-
+(provide find-option-by-keyword)
 ;===============================================================================================
 ;TDA Option - 
 ;Función que verifica unicidad de opcion antes de agregarla.
@@ -16,30 +16,11 @@
 ;TDA Option - Capa selectora
 ;===============================================================================================
 
-;(define get-option-code car); obtiene el code de la option
-;(define get-option-message cadr); obtiene el el mensaje de la funcion option 
-;(define get-option-chatbotCodeLink caddr); obtiene el ChatbotCodeLink de la funcion option 
-;(define get-option-initialFlowCodeLink cadddr); obtiene el InitialFlowCodeLink de la funcion option 
-;(define get-option-keyword (lambda (option) (car (cdr (cdr (cdr option)))))); obtiene el keyword de la funcion option
-
-(define (get-option-code option)
-  (car option))
-
-
-(define (get-option-message option)
-  (cadr option))
-
-(define (get-option-chatbotCodeLink option)
-  (caddr option))
-
-
-(define (get-option-initialFlowCodeLink option)
-  (cadddr option))
-
-
-(define (get-option-keyword option)
-  (cddddr option))
-
+(define get-option-code car); obtiene el code de la option
+(define get-option-message cadr); obtiene el el mensaje de la funcion option 
+(define get-option-chatbotCodeLink caddr); obtiene el ChatbotCodeLink de la funcion option 
+(define get-option-initialFlowCodeLink cadddr); obtiene el InitialFlowCodeLink de la funcion option 
+(define get-option-keyword (lambda (option) (car (cdr (cdr (cdr (cdr option))))))); obtiene el keyword de la funcion option
 
 
 ;===============================================================================================
@@ -53,5 +34,21 @@
 (define (option-exists? flow option)
   (member (get-option-code option) (map get-option-code (get-flow-options flow))))
 
+;===============================================================================================
+;busca una opción en un flujo por keyword.
+;===============================================================================================
+(define (find-option-by-keyword flow keyword)
+  (define (find-option-in-flow flow keyword)
+    (cond
+      ((null? (get-flow-options flow)) #f)
+      ((find-option (car (get-flow-options flow)) keyword) => values)
+      (else (find-option-in-flow (list (get-flow-id flow) (get-flow-name-msg flow) (cdr (get-flow-options flow))) keyword))))
 
+  (define (find-option option keyword)
+    (if (member keyword (get-option-keyword option))
+        option
+        #f))
 
+  (if (find-option-in-flow flow keyword)
+      (find-option-in-flow flow keyword)
+      #f))

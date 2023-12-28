@@ -1,4 +1,30 @@
 #lang racket
+(require "TDAchatbot.rkt")
+(provide get-system-name)
+(provide get-system-users)
+(provide get-system-initialChat)
+(provide get-system-chatbots)
+(provide get-system-loggedin)
+(provide get-system-history)
+(provide get-system-fecha)
+(provide make-system)
+(provide chatbot-exists?)
+(provide exists-system-user?)
+(provide exists-login-user?)
+(provide system-register)
+(provide system-register-login)
+(provide user-registered?)
+
+
+
+
+
+;===============================================================================================
+; TDA System - Constructor
+;=============================================================================================== 
+(define make-system
+  (lambda(name initialChatbotCodeLink chatbots users loggedin history fecha)
+    (list name initialChatbotCodeLink chatbots users loggedin history fecha)))
 
 ;===============================================================================================
 ; Capa Selectora - TDA System
@@ -7,70 +33,63 @@
 ;; Dom: name (str)
 ;; Rec: Atributo del sistema
 (define get-system-name car)  ;Nombre sistema
-(define get-system-users cadr) ;Lista usuarios sistema
-(define get-system-initialChat caddr) ;Codigo Initial Chatbot
-(define get-system-chatbots cadddr) ;Lista de Chatbots 
-(define get-system-loggedin (lambda (system) (car (cdr (cdr (cdr system))))));Usuario actual sistema
-(define get-system-history (lambda (system) (car (cdr (cdr (cdr (cdr system))))))) ; History
-(define get-system-fecha (lambda (system) (car (cdr (cdr (cdr (cdr (cdr system)))))))); fecha creacion sistema
+(define get-system-initialChat cadr) ;Codigo Initial Chatbot
+(define get-system-chatbots caddr) ;Lista de Chatbots
+(define get-system-users cadddr) ;Lista usuarios sistema
+(define get-system-loggedin (lambda (system) (car (cdr (cdr (cdr (cdr system)))))));Usuario actual sistema
+(define get-system-history (lambda (system) (car (cdr (cdr (cdr (cdr (cdr system)))))))) ; History
+(define get-system-fecha (lambda (system) (car (cdr (cdr (cdr (cdr (cdr (cdr system))))))))); fecha creacion sistema
 
 
-(define (get-system-name system)
-  (car system))
+;===============================================================================================
+; Capa Modificadora - TDA System
+;=============================================================================================== 
+; Descripción: Función que crea un user del sistema operativo
+;; Dom: user
+;; Rec: system
+(define system-register
+  (lambda (system new-user)
+    (make-system (get-system-name system)
+                 (get-system-initialChat system)
+                 (get-system-chatbots system)
+                 (cons new-user (get-system-users system))
+                 (get-system-loggedin system)
+                 (get-system-history system)
+                 (get-system-fecha system))))
 
-;;get-system-InitialChatbotCodeLink : permite obtener el InitialChatbotCodeLink de la funcion system
-;;Dom: system
-;;Rec: InitialChatbotCodeLink (integer)
 
-(define (get-system-InitialChatbotCodeLink system)
-  (cadr system))
-
-;;get-system-chatbots : permite obtener el chatbots de la funcion system
-;;Dom: system
-;;Rec: chatbots (lista)
-
-(define (get-system-chatbots system)
-  (caddr system))
-
-;;get-system-chatbot-history : permite obtener el historial de chatbot del sistema
-;;Dom: system
-;;Rec: history (lista)
-
-(define (get-system-chatbot-history system)
-  (cadddr system))
-
-;;chatbot-exists? : Verifica si chatbot existe en system para evitar duplicados 
-;;Dom: system X chatbot
-;;Rec: bool (#t o #f)
-
-(define (chatbot-exists? system chatbot)
-  (member chatbot (get-system-chatbots system)))
-
+; Descripción: Función que permite iniciar sesion a un user en el sistema
+;; Dom: user
+;; Rec: system
+(define system-register-login
+  (lambda (system username)
+    (make-system (get-system-name system)
+                 (get-system-initialChat system)
+                 (get-system-chatbots system)
+                 (get-system-users system)
+                  username
+                 (get-system-history system)
+                 (get-system-fecha system))))
 
 
 ;===============================================================================================
 ; Capa pertenencia - TDA System
-; Descripción:
 ;=============================================================================================== 
+;;Verifica si chatbot existe en la lista de chatbots del system para evitar duplicados 
+(define (chatbot-exists? system chatbot)
+  (member (get-chatbot-id chatbot) (map get-chatbot-id (get-system-chatbots system))))
 
+;;Verifica si existe usuario en la lista de usuarios del system para evitar duplicados 
 (define (exists-system-user? username system)  ;existe el usuario en el sistema?
   (member username (get-system-users system)))
 
+
+;; Verifica si un usuario está registrado en el sistema
+(define (user-registered? username system)
+  (member username (get-system-users system)))
+
+;; Verifica si existe un usuario logueado en el sistema
 (define (exists-login-user? username system)
   (let ((loggedin (get-system-loggedin system)))
-    (and (list? loggedin)
-         (member username loggedin))))
-
-
-
-
-;;get-chatbot-by-id : Verifica si chatbot existe en system para evitar duplicados 
-;;Dom: system X chatbot-id
-;;Rec: chatbot | bool (#f)
-
-(define (get-chatbot-by-id system chatbot-id)
-  (let* ((chatbots (get-system-chatbots system))
-         (chatbot (find-chatbot-by-id chatbots chatbot-id)))
-    (if chatbot
-        chatbot
-        #f)))
+    (and (string? loggedin)
+         (not (equal? loggedin "")))))
